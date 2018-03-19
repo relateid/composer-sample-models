@@ -1,0 +1,120 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+namespace com.relateid.model.compose.copyright
+
+/**
+ * The types of licenses allowes that could be moved
+ */
+enum LicenseType {
+  o PERSONAL
+  o COMMERCIAL
+  o STREAM
+}
+
+/**
+ * The Base Entity
+ */
+abstract participant Entity identified by id {
+  o String id
+  o String name
+  o Double balance default=0.0
+}
+
+/**
+ * Information about an Artist on the network.
+ */
+participant Artist extends Entity {
+}
+
+/**
+ * Information about an Buyer on the network.
+ */
+participant Buyer extends Entity {
+}
+
+/**
+ * Information about an Media Reseller on the network.
+ */
+participant Reseller extends Entity {
+}
+
+/**
+ * A licence for the resale of a song by a song reseller to someone.
+ * A song may have may leverage different licenses when being sold.
+ * For example, one time play vs life time play.
+ */
+asset License identified by id {
+  o String   licenseId
+  o LicenseType licenseType
+  o String url
+}
+
+/**
+ * The abstract model for media.
+ */
+abstract asset Media identified by hash {
+  o String   hash
+  o Boolean copyrighted default=true
+  o String name
+  --> Artist owner
+}
+
+/**
+ * The song created by the artist.
+ */
+asset Song extends Media {
+  o String genre
+}
+
+/**
+ * The video created by the artist.
+ */
+asset Video extends Media {
+  o String formats
+}
+
+/**
+ * An agreement between an artist and an organization to sell their music.
+ */
+asset MediaSellingAgreement identified by id {
+  o String id
+  o Double resellersPercent
+  --> Reseller reseller
+  --> Media media
+  --> License license
+}
+
+/**
+ * An agreement between an artist and an organization to sell their music.
+ */
+asset LicensedMedia identified by id {
+  o String id
+  o Integer playCount
+  --> Buyer owner
+  --> MediaSellingAgreement songSellingAgreement
+}
+
+/**
+ * The transaction to buy a song.
+ */
+transaction BuyMedia {
+  o Double price
+  --> Buyer buyer
+  --> MediaSellingAgreement mediaSellingAgreement
+}
+
+transaction PlayMedia {
+  --> Buyer owner
+  --> MediaSellingAgreement mediaSellingAgreement
+}
